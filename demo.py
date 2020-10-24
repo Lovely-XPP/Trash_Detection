@@ -5,6 +5,7 @@ import os
 import time
 import cv2
 import tqdm
+import time
 
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog, DatasetCatalog
@@ -18,8 +19,9 @@ from predictor import VisualizationDemo
 WINDOW_NAME = "detections"
 
 # inference
-INPUT_IMG_PATH = '/home/XPP/桌面/trash/trash/input_img/'
-OUTPUT_IMG_PATH = '/home/XPP/桌面/trash/trash/ouput_img/'
+INPUT_IMG_PATH = './input_img/'
+OUTPUT_IMG_PATH = './ouput_img/'
+OUTPUT_VIDEO_PATH = './out_video/'
 
 # 数据集路径
 ROOT_DIR = os.getcwd()
@@ -119,7 +121,7 @@ def setup_cfg(args):
     cfg.MODEL.DEVICE = "cpu"
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 8 # 类别数
     # cfg.MODEL.WEIGHTS = "/home/XPP/桌面/trash/source/R-50.pkl"  # 预训练模型权重
-    cfg.MODEL.WEIGHTS = "/home/XPP/桌面/trash/trash/output/model_final.pth"   # 最终权重
+    cfg.MODEL.WEIGHTS = "./output/model_final.pth"   # 最终权重
     cfg.SOLVER.IMS_PER_BATCH = 2  # batch_size=2; iters_in_one_epoch = dataset_imgs/batch_size  
     ITERS_IN_ONE_EPOCH = int(1434 / cfg.SOLVER.IMS_PER_BATCH)
     cfg.SOLVER.MAX_ITER = (ITERS_IN_ONE_EPOCH * 12) - 1 # 12 epochs
@@ -157,11 +159,6 @@ def get_parser():
     )
     parser.add_argument("--input", nargs="+", help="A list of space separated input images")
     parser.add_argument(
-        "--output",
-        help="A file or directory to save output visualizations. "
-             "If not given, will show output in an OpenCV window.",
-    )
-    parser.add_argument(
         "--confidence-threshold",
         type=float,
         default=0.5,
@@ -190,14 +187,45 @@ if __name__ == "__main__":
     demo = VisualizationDemo(cfg, instance_mode=ColorMode.SEGMENTATION)
 
     if args.webcam:
-        assert args.input is None, "Cannot have both --input and --webcam!"
-        cam = cv2.VideoCapture(0)
-        for vis in tqdm.tqdm(demo.run_on_video(cam)):
+        assert args.input is None, "不可以同时输入 --input 和 --webcam!"
+        time_now = time.strftime("%Y%m%d%H%M", time.localtime()) # 获取当前时间
+        cap = cv2.VideoCapture(0)
+        fps = cap.get(cv2.CAP_PROP_FPS)  # 返回视频的fps--帧率
+        path = OUTPUT_VIDEO_PATH + time_now + "/" #获取当前路径
+        vpath =  path + 'output.mp4'#视频目录
+        if not(os.path.exists(path)):
+            #print('n')  #没有就建一个
+            os.makedirs(path)
+        output_fname = time_now + '.mp4'# 以当前时间命名文件
+        output_video = cv2.VideoWriter(
+                filename=vpath,
+                fourcc=cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
+                fps=20.0,
+                frameSize=(640, 480),
+            )
+        """
+            参数1 即将保存的文件路径
+            参数2 VideoWriter_fourcc为视频编解码器
+            fourcc意为四字符代码（Four-Character Codes），顾名思义，该编码由四个字符组成,下面是VideoWriter_fourcc对象一些常用的参数,注意：字符顺序不能弄混
+            cv2.VideoWriter_fourcc('I', '4', '2', '0'),该参数是YUV编码类型，文件名后缀为.avi 
+            cv2.VideoWriter_fourcc('P', 'I', 'M', 'I'),该参数是MPEG-1编码类型，文件名后缀为.avi 
+            cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),该参数是MPEG-4编码类型，文件名后缀为.avi 
+            cv2.VideoWriter_fourcc('T', 'H', 'E', 'O'),该参数是Ogg Vorbis,文件名后缀为.ogv 
+            cv2.VideoWriter_fourcc('F', 'L', 'V', '1'),该参数是Flash视频，文件名后缀为.flv
+            cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),文件名后缀为.mp4
+            参数3 为帧播放速率
+            参数4 (width,height)为视频帧大小
+        """
+        for vis in tqdm.tqdm(demo.run_on_video(cap)):
             cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
             cv2.imshow(WINDOW_NAME, vis)
+            output_video.write(vis)
             if cv2.waitKey(1) == 27:
-                break  # esc to quit
+                break  # 按Esc键结束
+        cap.release()
+        output_video.release()
         cv2.destroyAllWindows()
+
     elif args.video_input:
         video = cv2.VideoCapture(args.video_input)
         width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -205,32 +233,21 @@ if __name__ == "__main__":
         frames_per_second = video.get(cv2.CAP_PROP_FPS)
         num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
         basename = os.path.basename(args.video_input)
- 
-        if args.output:
-            if os.path.isdir(args.output):
-                output_fname = os.path.join(args.output, basename)
-                output_fname = os.path.splitext(output_fname)[0] + ".mkv"
-            else:
-                output_fname = args.output
-            assert not os.path.isfile(output_fname), output_fname
-            output_file = cv2.VideoWriter(
-                filename=output_fname,
-                # some installation of opencv may not support x264 (due to its license),
-                # you can try other format (e.g. MPEG)
-                fourcc=cv2.VideoWriter_fourcc(*"x264"),
-                fps=float(frames_per_second),
-                frameSize=(width, height),
-                isColor=True,
-            )
-        assert os.path.isfile(args.video_input)
+        output_fname = os.path.join(OUTPUT_VIDEO_PATH, basename)
+        output_fname = os.path.splitext(output_fname)[0] + ".mp4"
+        output_file = cv2.VideoWriter(
+            filename=output_fname,
+            fourcc=cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
+            fps=float(frames_per_second),
+            frameSize=(width, height),
+            isColor=True,
+        )
         for vis_frame in tqdm.tqdm(demo.run_on_video(video), total=num_frames):
-            if args.output:
-                output_file.write(vis_frame)
-            else:
-                cv2.namedWindow(basename, cv2.WINDOW_NORMAL)
-                cv2.imshow(basename, vis_frame)
-                if cv2.waitKey(1) == 27:
-                    break  # esc to quit
+            cv2.namedWindow(basename, cv2.WINDOW_NORMAL)
+            cv2.imshow(basename, vis_frame)
+            output_file.write(vis_frame)
+            if cv2.waitKey(1) == 27:
+                break  # 按Esc键结束
         video.release()
         
     else:
@@ -247,16 +264,10 @@ if __name__ == "__main__":
                 )
             )
 
-            if args.output:
-                if os.path.isdir(args.output):
-                    assert os.path.isdir(args.output), args.output
-                    out_filename = os.path.join(args.output, os.path.basename(imgfile))
-                else:
-                    assert len(args.input) == 1, "Please specify a directory with args.output"
-                    out_filename = args.output
-                visualized_output.save(out_filename)
-            else:
-                cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-                cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
-                if cv2.waitKey(0) == 27:
-                    continue  # esc to quit 
+            cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
+            img = visualized_output.get_image()[:, :, ::-1]
+            cv2.imshow(WINDOW_NAME, img)
+            img_name = OUPUT_IMG_PATH + os.path.basename(imgfile)
+            cv2.imwrite(img_name , img)
+            if cv2.waitKey(0) == 27:
+                continue  # 按Esc键继续下一个图片
