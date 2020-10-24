@@ -17,14 +17,14 @@ from predictor import VisualizationDemo
 
 # constants
 WINDOW_NAME = "detections"
+ROOT_DIR = os.getcwd()
 
 # inference
-INPUT_IMG_PATH = './input_img/'
-OUTPUT_IMG_PATH = './ouput_img/'
-OUTPUT_VIDEO_PATH = './out_video/'
+INPUT_IMG_PATH = os.path.join(ROOT_DIR, 'input_img/')
+OUTPUT_IMG_PATH = os.path.join(ROOT_DIR, 'out_img/')
+OUTPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'out_video/')
 
 # 数据集路径
-ROOT_DIR = os.getcwd()
 DATASET_ROOT = ROOT_DIR
 ANN_ROOT = os.path.join(DATASET_ROOT, 'coco/annotations/')
 TRAIN_PATH = os.path.join(DATASET_ROOT, 'coco/images/train2019/')
@@ -153,7 +153,7 @@ def get_parser():
 
     parser.add_argument(
         "--config-file",
-        default="configs/quick_schedules/e2e_mask_rcnn_R_50_FPN_inference_acc_test.yaml",
+        default="configs/COCO-InstanceSegmentation/mask_rcnn_R_101_FPN_3x.yaml",
         metavar="FILE",
         help="path to config file",
     )
@@ -161,7 +161,7 @@ def get_parser():
     parser.add_argument(
         "--confidence-threshold",
         type=float,
-        default=0.5,
+        default=0.7,
         help="Minimum score for instance predictions to be shown",
     )
     parser.add_argument(
@@ -200,7 +200,7 @@ if __name__ == "__main__":
         output_video = cv2.VideoWriter(
                 filename=vpath,
                 fourcc=cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
-                fps=20.0,
+                fps=10,
                 frameSize=(640, 480),
             )
         """
@@ -238,7 +238,7 @@ if __name__ == "__main__":
         output_file = cv2.VideoWriter(
             filename=output_fname,
             fourcc=cv2.VideoWriter_fourcc('m', 'p', '4', 'v'),
-            fps=float(frames_per_second),
+            fps=10,
             frameSize=(width, height),
             isColor=True,
         )
@@ -249,6 +249,8 @@ if __name__ == "__main__":
             if cv2.waitKey(1) == 27:
                 break  # 按Esc键结束
         video.release()
+        output_file.release()
+        cv2.destroyAllWindows()
         
     else:
         for imgfile in os.listdir(INPUT_IMG_PATH):
@@ -267,7 +269,8 @@ if __name__ == "__main__":
             cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
             img = visualized_output.get_image()[:, :, ::-1]
             cv2.imshow(WINDOW_NAME, img)
-            img_name = OUPUT_IMG_PATH + os.path.basename(imgfile)
+            img_name = OUTPUT_IMG_PATH + os.path.basename(imgfile)
+            print(img_name)
             cv2.imwrite(img_name , img)
             if cv2.waitKey(0) == 27:
                 continue  # 按Esc键继续下一个图片
