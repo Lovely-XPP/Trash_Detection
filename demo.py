@@ -27,8 +27,8 @@ OUTPUT_VIDEO_PATH = os.path.join(ROOT_DIR, 'out_video/')
 # 数据集路径
 DATASET_ROOT = ROOT_DIR
 ANN_ROOT = os.path.join(DATASET_ROOT, 'coco/annotations/')
-TRAIN_PATH = os.path.join(DATASET_ROOT, 'coco/images/train2019/')
-VAL_PATH = os.path.join(DATASET_ROOT, 'coco/images/val2019/')
+TRAIN_PATH = os.path.join(DATASET_ROOT, 'coco/train2019/')
+VAL_PATH = os.path.join(DATASET_ROOT, 'coco/val2019/')
 TRAIN_JSON = os.path.join(ANN_ROOT, 'instances_train2019.json')
 VAL_JSON = os.path.join(ANN_ROOT, 'instances_val2019.json')
 
