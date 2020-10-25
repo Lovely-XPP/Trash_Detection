@@ -17,8 +17,8 @@ from detectron2.modeling import GeneralizedRCNNWithTTA
 ROOT_DIR = os.getcwd()
 DATASET_ROOT = ROOT_DIR
 ANN_ROOT = os.path.join(DATASET_ROOT, 'coco/annotations/')
-TRAIN_PATH = os.path.join(DATASET_ROOT, 'coco/images/train2019/')
-VAL_PATH = os.path.join(DATASET_ROOT, 'coco/images/val2019/')
+TRAIN_PATH = os.path.join(DATASET_ROOT, 'coco/train2019/')
+VAL_PATH = os.path.join(DATASET_ROOT, 'coco/val2019/')
 TRAIN_JSON = os.path.join(ANN_ROOT, 'instances_train2019.json')
 VAL_JSON = os.path.join(ANN_ROOT, 'instances_val2019.json')
 
@@ -127,10 +127,11 @@ def setup(args):
     cfg.INPUT.MIN_SIZE_TEST = 160
     cfg.MODEL.DEVICE = "cpu"
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 8 # 类别数
-    cfg.MODEL.WEIGHTS = "/home/XPP/桌面/trash/trash/output/model_final.pth"    # 预训练模型权重
+    # cfg.MODEL.WEIGHTS = "/the/Path/to/R-101.pkl"  # 预训练模型权重
+    cfg.MODEL.WEIGHTS = "./output/model_final.pth"   # 最终权重
     cfg.SOLVER.IMS_PER_BATCH = 2  # batch_size=2; iters_in_one_epoch = dataset_imgs/batch_size  
     ITERS_IN_ONE_EPOCH = int(1434 / cfg.SOLVER.IMS_PER_BATCH)
-    cfg.SOLVER.MAX_ITER = (ITERS_IN_ONE_EPOCH * 4) - 1 # 12 epochs
+    cfg.SOLVER.MAX_ITER = (ITERS_IN_ONE_EPOCH * 20) - 1 # 12 epochs
     cfg.SOLVER.BASE_LR = 0.002
     cfg.SOLVER.MOMENTUM = 0.9
     cfg.SOLVER.WEIGHT_DECAY = 0.0001

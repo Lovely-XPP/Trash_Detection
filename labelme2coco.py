@@ -23,7 +23,7 @@ class Lableme2CoCo:
         self.ann_id = 0
 
     def save_coco_json(self, instance, save_path):
-        json.dump(instance, open(save_path, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)  # indent=2 更加美观显示
+        json.dump(instance, open(save_path, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)  # indent=2 更加美观显示
 
     # 由json文件构建COCO
     def to_coco(self, json_path_list):
@@ -104,14 +104,24 @@ class Lableme2CoCo:
 
 
 if __name__ == '__main__':
-
+    rootdir="./coco/"
+    if ((os.path.exists(rootdir))):
+        filelist=[]
+        filelist=os.listdir(rootdir)
+        for f in filelist:
+            filepath = os.path.join( rootdir, f )
+            if os.path.isfile(filepath):
+                os.remove(filepath)
+            elif os.path.isdir(filepath):
+                shutil.rmtree(filepath,True)
+        shutil.rmtree(rootdir,True)
     # 创建文件
     if not os.path.exists("%scoco/annotations/"%saved_coco_path):
         os.makedirs("%scoco/annotations/"%saved_coco_path)
-    if not os.path.exists("%scoco/images/train2019/"%saved_coco_path):
-        os.makedirs("%scoco/images/train2019"%saved_coco_path)
-    if not os.path.exists("%scoco/images/val2019/"%saved_coco_path):
-        os.makedirs("%scoco/images/val2019"%saved_coco_path)
+    if not os.path.exists("%scoco/train2019/"%saved_coco_path):
+        os.makedirs("%scoco/train2019"%saved_coco_path)
+    if not os.path.exists("%scoco/val2019/"%saved_coco_path):
+        os.makedirs("%scoco/val2019"%saved_coco_path)
     # 获取images目录下所有的joson文件列表
     json_list_path = glob.glob(labelme_path + "/*.json")
     # 数据划分,这里没有区分val2017和tran2017目录，所有图片都放在images目录下
@@ -123,9 +133,9 @@ if __name__ == '__main__':
     train_instance = l2c_train.to_coco(train_path)
     l2c_train.save_coco_json(train_instance, '%scoco/annotations/instances_train2019.json'%saved_coco_path)
     for file in train_path:
-        shutil.copy(file.replace("json","jpg"),"%scoco/images/train2019/"%saved_coco_path)
+        shutil.copy(file.replace("json","jpg"),"%scoco/train2019/"%saved_coco_path)
     for file in val_path:
-        shutil.copy(file.replace("json","jpg"),"%scoco/images/val2019/"%saved_coco_path)
+        shutil.copy(file.replace("json","jpg"),"%scoco/val2019/"%saved_coco_path)
 
     # 把验证集转化为COCO的json格式
     l2c_val = Lableme2CoCo()
