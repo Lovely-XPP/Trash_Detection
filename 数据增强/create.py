@@ -31,7 +31,6 @@ if (p == 0):
                 print("\033[1;36;40mINFO \033[0m \033[0;32;40m[Step4: csv retranslate to coco data success!]\033[0m")
                 print()
                 print("\033[1;36;40mINFO \033[0m \033[0;32;40m[All Steps finish successfully!]\033[0m")
-                p=os.system(str)
             else:
                 print()
                 print("\033[5;31;40mERROR \033[0m \033[0m \033[1;31;40m[Step4: csv retranslate to coco data fail!]\033[0m")
