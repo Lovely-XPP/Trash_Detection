@@ -126,7 +126,7 @@ if __name__ == '__main__':
     # 获取images目录下所有的joson文件列表
     json_list_path = glob.glob(labelme_path + "/*.json")
     # 数据划分,这里没有区分val2019和tran2019目录，所有图片都放在images目录下
-    train_path, val_path = train_test_split(json_list_path, test_size=0.08)
+    train_path, val_path = train_test_split(json_list_path, test_size=0.00001)
     print("train_n:", len(train_path), 'val_n:', len(val_path))
 
     # 把训练集转化为COCO的json格式

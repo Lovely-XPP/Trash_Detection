@@ -140,7 +140,7 @@ if __name__ == '__main__':
             total_csv_annotations[key] = value
     # 按照键值划分数据
     total_keys = list(total_csv_annotations.keys())
-    train_keys, val_keys = train_test_split(total_keys, test_size=0.2)
+    train_keys, val_keys = train_test_split(total_keys, test_size=0.08)
     print("train_n:", len(train_keys), 'val_n:', len(val_keys))
     # 创建必须的文件夹
     if not os.path.exists('%scoco/annotations/'%saved_coco_path):
