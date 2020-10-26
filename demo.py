@@ -121,9 +121,9 @@ def setup_cfg(args):
     cfg.MODEL.DEVICE = "cpu"
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 8 # 类别数
     # cfg.MODEL.WEIGHTS = "/the/Path/to/R-101.pkl"  # 预训练模型权重
-    cfg.MODEL.WEIGHTS = "./output/model_final.pth"   # 最终权重
+    cfg.MODEL.WEIGHTS = "./output/model_0003746.pth"   # 最终权重
     cfg.SOLVER.IMS_PER_BATCH = 2  # batch_size=2; iters_in_one_epoch = dataset_imgs/batch_size  
-    ITERS_IN_ONE_EPOCH = int(1434 / cfg.SOLVER.IMS_PER_BATCH)
+    ITERS_IN_ONE_EPOCH = int(2500 / cfg.SOLVER.IMS_PER_BATCH)
     cfg.SOLVER.MAX_ITER = (ITERS_IN_ONE_EPOCH * 12) - 1 # 12 epochs
     cfg.SOLVER.BASE_LR = 0.002
     cfg.SOLVER.MOMENTUM = 0.9
@@ -161,7 +161,7 @@ def get_parser():
     parser.add_argument(
         "--confidence-threshold",
         type=float,
-        default=0.7,
+        default=0.5,
         help="Minimum score for instance predictions to be shown",
     )
     parser.add_argument(
