@@ -6,8 +6,17 @@ import shutil
 from sklearn.model_selection import train_test_split
 np.random.seed(41)
 
-#0为背景
+#--- 可修改选项 ---#
+
+# 设置图像的标记类别,0为背景(一定要根据labelme的标记改,否则会报错)
 classname_to_id = {"foodbox": 1, "paper box": 2, "battery cell": 3, "cup": 4, "battery": 5, "bottle": 6, "can": 7}
+
+# 测试集所占比例
+test_rate = 0.12
+
+#----------------#
+
+# - 若无问题请勿更改以下的代码 - #
 print(classname_to_id)
 ROOT_DIR = os.getcwd()
 labelme_path = ROOT_DIR + '/pic/'
@@ -125,7 +134,7 @@ if __name__ == '__main__':
     # 获取images目录下所有的joson文件列表
     json_list_path = glob.glob(labelme_path + "/*.json")
     # 数据划分,这里没有区分val2017和tran2017目录，所有图片都放在images目录下
-    train_path, val_path = train_test_split(json_list_path, test_size=0.08)
+    train_path, val_path = train_test_split(json_list_path, test_size=test_rate)
     print("train_n:", len(train_path), 'val_n:', len(val_path))
 
     # 把训练集转化为COCO的json格式
